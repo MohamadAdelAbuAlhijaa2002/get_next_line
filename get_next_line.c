@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "get_next_line.h"
 
 static char	*gnl_grow(char *stash, size_t len, size_t cap)
@@ -51,9 +52,20 @@ static int	gnl_append(char **stash, size_t *len, size_t *cap,
 	}
 	i = 0;
 	while (i < add)
-		(*stash)[(*len)++] = buffer[i++];
+	{
+		(*stash)[*len] = buffer[i];
+		(*len)++;
+		i++;
+	}
 	(*stash)[*len] = '\0';
 	return (1);
+}
+
+static char	*gnl_cleanup(char *stash, char *buffer)
+{
+	free(buffer);
+	free(stash);
+	return (NULL);
 }
 
 static char	*gnl_read_loop(int fd, char *stash,
@@ -64,10 +76,7 @@ static char	*gnl_read_loop(int fd, char *stash,
 
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
-	{
-		free(stash);
-		return (NULL);
-	}
+		return (gnl_cleanup(stash, NULL));
 	bytes_read = 1;
 	while (bytes_read > 0)
 	{
@@ -76,37 +85,32 @@ static char	*gnl_read_loop(int fd, char *stash,
 			break ;
 		buffer[bytes_read] = '\0';
 		if (!gnl_append(&stash, len, cap, buffer))
-			return (free(buffer), free(stash), NULL);
+			return (gnl_cleanup(stash, buffer));
 		if (gnl_has_newline(buffer))
 			break ;
 	}
 	free(buffer);
 	if (bytes_read < 0)
-		return (free(stash), NULL);
+		return (gnl_cleanup(stash, NULL));
 	return (stash);
-}
-
-char	*gnl_read_to_stash(int fd, char *stash)
-{
-	size_t	len;
-	size_t	cap;
-
-	if (gnl_has_newline(stash))
-		return (stash);
-	len = gnl_strlen(stash);
-	cap = len + (stash != NULL);
-	return (gnl_read_loop(fd, stash, &len, &cap));
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*stash;
 	char		*line;
+	size_t		len;
+	size_t		cap;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	stash = gnl_read_to_stash(fd, stash);
-	if (!stash[fd])
+	if (!gnl_has_newline(stash))
+	{
+		len = gnl_strlen(stash);
+		cap = len + (stash != NULL);
+		stash = gnl_read_loop(fd, stash, &len, &cap);
+	}
+	if (!stash)
 		return (NULL);
 	line = gnl_extract_line(stash);
 	if (!line)
