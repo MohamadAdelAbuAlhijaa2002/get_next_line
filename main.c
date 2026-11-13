@@ -1,33 +1,21 @@
-
 #include "get_next_line.h"
 #include <fcntl.h>
 #include <stdio.h>
 
-int	main(void)
+int main(void)
 {
-	int		fd;
-	char	*line;
-	int		i;
+    int fd = open("test1.txt", O_RDONLY);
+    char *line;
+    int i = 0;
 
-	printf("Length of NULL = %zu\n", gnl_strlen(NULL));
-	printf("Length of Hell = %zu\n", gnl_strlen("Hell"));
-	fd = open("test.txt", O_RDONLY);
-	if (fd == -1)
-	{
-		perror("open");
-		return (1);
-	}
-	i = 1;
-	line = get_next_line(fd);
-	while (line != NULL)
-	{
-		printf("Line %d: %s", i, line);
-		free(line);
-		i++;
-		line = get_next_line(fd);
-	}
-	printf("\n[EOF reached]\n");
-	close(fd);
-	return (0);
+    if (fd < 0)
+        return (1);
+    while (++i < 4)
+    {
+        line = get_next_line(fd);
+        printf("%s", line);
+        free(line);
+    }
+    close(fd);
+    return (0);
 }
-

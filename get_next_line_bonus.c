@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mabualha <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/11/13 13:00:22 by mabualha          #+#    #+#             */
+/*   Updated: 2026/11/13 13:04:21 by mabualha         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line_bonus.h"
 
 static char	*gnl_grow(char *stash, size_t len, size_t cap)
@@ -97,7 +109,7 @@ char	*get_next_line(int fd)
 	if (!line)
 	{
 		free(stash[fd]);
-		stash[fd]= NULL;
+		stash[fd] = NULL;
 		return (NULL);
 	}
 	stash[fd] = gnl_update_stash(stash[fd]);
